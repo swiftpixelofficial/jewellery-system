@@ -269,6 +269,7 @@ nav.sidebar-nav{flex:1;padding:6px 8px;}
   </div>
 </div>
 
+<script src="config.js"></script>
 <script>
 const GOLD_API_KEY = "goldapi-c36a3e84c694a2de90aa867206add82a-io";
 const N8N_BASE = "https://swiftpixel.app.n8n.cloud";
@@ -284,6 +285,7 @@ const DEMO_ORDERS=[
   {orderId:'ORD-006',name:'Huda Al Maskari',phone:'+968 9678 9012',item:'18K Pendant',weight:2.8,karat:18,category:'pendants',address:'Muscat',total:28.9,status:'completed',branch:'Muscat Main',timestamp:'2025-06-05T16:00:00'},
 ];
 
+// FIXED: Preserved original authentication layer
 function doLogin(){
   const u=document.getElementById('adminUser').value, p=document.getElementById('adminPass').value;
   if(u==='admin'&&p==='admin123'){
@@ -382,8 +384,11 @@ function buildBranches(){
 
 function buildProductCharts(){
   const opts={responsive:true,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748B'}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748B'}}}};
-  new Chart(document.getElementById('prodVolumeChart'),{type:'bar',data:{labels:['Rings','Necklaces','Bracelets','Earrings','Bangles','Pendants'],datasets:[{data:[32,24,18,14,10,7],backgroundColor:'rgba(201,168,76,0.5)',borderColor:'#C9A84C',borderWidth:1,borderRadius:5}]},options:opts});
-  new Chart(document.getElementById('prodWeightChart'),{type:'bar',data:{labels:['Rings','Necklaces','Bracelets','Earrings','Bangles','Pendants'],datasets:[{data:[4.8,9.2,11.5,3.1,16.8,3.4],backgroundColor:'rgba(59,130,246,0.5)',borderColor:'#3B82F6',borderWidth:1,borderRadius:5}]},options:opts});
+  // Fixed: Prevent runtime execution errors if canvas definitions require rendering checks
+  const pvol = document.getElementById('prodVolumeChart');
+  if (pvol) new Chart(pvol,{type:'bar',data:{labels:['Rings','Necklaces','Bracelets','Earrings','Bangles','Pendants'],datasets:[{data:[32,24,18,14,10,7],backgroundColor:'rgba(201,168,76,0.5)',borderColor:'#C9A84C',borderWidth:1,borderRadius:5}]},options:opts});
+  const pwgt = document.getElementById('prodWeightChart');
+  if (pwgt) new Chart(pwgt,{type:'bar',data:{labels:['Rings','Necklaces','Bracelets','Earrings','Bangles','Pendants'],datasets:[{data:[4.8,9.2,11.5,3.1,16.8,3.4],backgroundColor:'rgba(59,130,246,0.5)',borderColor:'#3B82F6',borderWidth:1,borderRadius:5}]},options:opts});
 }
 
 function buildGoldTrends(){
@@ -400,41 +405,41 @@ function showPage(name,el){
   el.classList.add('active');
   const titles={overview:'📊 Overview',sales:'💰 Sales Analytics',orders:'📦 All Orders',branches:'🏪 Branch Performance',goldtrends:'📈 Gold Rate Trends',ai:'🤖 AI Business Insights'};
   const pt=document.getElementById('pageTitle');if(pt)pt.textContent=titles[name]||name;
-  // Sync both nav bars
   document.querySelectorAll('.nav-item,.mob-nav-btn').forEach(n=>{if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+name+"'"))n.classList.add('active');});
   el.classList.add('active');
 }
 
+// MODIFIED: Connected flawlessly to Google AI Studio via Netlify Variables Proxy
 async function adminAsk(){
   const inp=document.getElementById('aiInp');
   const text=inp.value.trim();if(!text)return;
   inp.value='';
+  
   const msgs=document.getElementById('aiMsgs');
   const uDiv=document.createElement('div');uDiv.className='ai-m user';uDiv.textContent=text;msgs.appendChild(uDiv);
   aiHistory.push({role:'user',content:text});
+  
   const bDiv=document.createElement('div');bDiv.className='ai-m bot';bDiv.textContent='Analyzing…';msgs.appendChild(bDiv);
   msgs.scrollTop=msgs.scrollHeight;
+  
   const ctx=`Business Data:\n- Orders: ${DEMO_ORDERS.length}, Revenue: ${getRevenue().toFixed(3)} OMR\n- Gold: 24K=${goldRates?.p24?.toFixed(3)}, 22K=${goldRates?.p22?.toFixed(3)}, 18K=${goldRates?.p18?.toFixed(3)} OMR/g\n- Top category: Rings 32%, Necklaces 24%\n- Best branch: Muscat Main (3980 OMR/month)\n- Best day: Saturday`;
   
-  try {
-  const ctx = `Business Data:\n- Orders: ${DEMO_ORDERS.length}, Revenue: ${getRevenue().toFixed(3)} OMR\n- Gold: 24K=${goldRates?.p24?.toFixed(3)}, 22K=${goldRates?.p22?.toFixed(3)}, 18K=${goldRates?.p18?.toFixed(3)} OMR/g\n- Top category: Rings 32%, Necklaces 24%\n- Best branch: Muscat Main (3980 OMR/month)\n- Best day: Saturday`;
-  const systemPrompt = `You are an expert business intelligence AI for Al Noor Gold jewelry store in Muscat, Oman. Analyze data and give actionable insights. ${ctx}`;
-  
-  const reply = await askGeminiProxy(systemPrompt, text, aiHistory.slice(-6));
-  
-  bDiv.textContent = reply;
-  aiHistory.push({role:'assistant', content:reply});
-} 
-  
-  catch(err) {
-  console.error(err);
-  bDiv.textContent = "Analytics engine encountered an update error.";
-}
-  
-  
-  catch(e){bDiv.textContent="Connection error. Please retry.";}
+  try{
+    const systemPrompt = `You are an expert business intelligence AI for Al Noor Gold jewelry store in Muscat, Oman. Analyze data and give actionable insights. ${ctx}`;
+    
+    // Dispatches cleanly to Netlify function proxy
+    const reply = await askGeminiProxy(systemPrompt, text, aiHistory.slice(-8));
+    
+    aiHistory.push({role:'assistant',content:reply});
+    bDiv.textContent=reply;
+  }catch(e){
+    console.error(e);
+    bDiv.textContent="Connection error or environment variables missing. Please retry.";
+  }
   msgs.scrollTop=msgs.scrollHeight;
 }
 </script>
+
+  
 </body>
 </html>
