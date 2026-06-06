@@ -12,7 +12,7 @@ const CONFIG = {
   TELEGRAM_GROUP_ID: "8994630048",
 
    // Google AI Studio (Gemini)
-  // GEMINI_API_KEY: "AQ.Ab8RN6JAXsjPP9irXnKUubBStLq7eSXrypxbfufVJKXNEGnAkA",
+  // GEMINI_API_KEY: "",
   // GEMINI_MODEL: "gemini-1.5-pro",
 
   // n8n Webhook URLs
