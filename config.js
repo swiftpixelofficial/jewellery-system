@@ -150,3 +150,34 @@ async function askGeminiProxy(systemPrompt, userMessage, history = []) {
   const data = await res.json();
   return data.reply;
 }
+
+
+
+
+// ============================================
+// GEMINI AI STUDIO CONCIERGE PROXY HELPER
+// ============================================
+async function askGeminiProxy(systemPrompt, userMessage, history = []) {
+  // Map historical objects perfectly into Gemini structure
+  const messages = [
+    ...history,
+    { role: "user", content: userMessage },
+  ];
+
+  const res = await fetch("/.netlify/functions/gemini-proxy", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      systemInstruction: systemPrompt,
+      messages: messages
+    }),
+  });
+
+  if (!res.ok) {
+    const errData = await res.json();
+    throw new Error(errData.error || "Failed context processing via Netlify Function Proxy.");
+  }
+
+  const data = await res.json();
+  return data.reply;
+}
