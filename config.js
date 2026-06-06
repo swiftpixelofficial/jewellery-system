@@ -11,10 +11,11 @@ const CONFIG = {
   TELEGRAM_TOKEN: "8994630048:AAHL8Q95Mw8bxroByusTNbsEruNm0QVofCY",
   TELEGRAM_GROUP_ID: "8994630048",
 
-  // Claude API
-  CLAUDE_MODEL: "claude-sonnet-4-20250514",
+   // Google AI Studio (Gemini)
+  GEMINI_API_KEY: "AQ.Ab8RN6JAXsjPP9irXnKUubBStLq7eSXrypxbfufVJKXNEGnAkA",
+  GEMINI_MODEL: "gemini-1.5-pro",
 
-  // n8n Webhook URLs (configure these after deploying n8n workflows)
+  // n8n Webhook URLs
   N8N_BASE: "https://swiftpixel.app.n8n.cloud",
   WEBHOOKS: {
     SAVE_ORDER: "/webhook/save-order",
@@ -25,7 +26,7 @@ const CONFIG = {
     NOTIFY_TEAM: "/webhook/notify-team",
   },
 
-  // Making charges per gram by category (OMR)
+  // Making charges per gram (OMR)
   MAKING_CHARGES: {
     rings: 2.5,
     necklaces: 3.0,
@@ -35,13 +36,13 @@ const CONFIG = {
     pendants: 2.5,
   },
 
-  // VAT rate
   VAT_RATE: 0.05,
 };
 
 // ============================================
 // GOLD RATE FETCHER
 // ============================================
+
 async function fetchLiveGoldRate() {
   try {
     const res = await fetch(CONFIG.GOLD_API_URL, {
@@ -50,23 +51,21 @@ async function fetchLiveGoldRate() {
         "Content-Type": "application/json",
       },
     });
+
     const data = await res.json();
-    // price_gram_24k in OMR
+
     return {
       pricePerGram24k: data.price_gram_24k,
       pricePerGram22k: data.price_gram_22k || data.price_gram_24k * (22 / 24),
       pricePerGram18k: data.price_gram_18k || data.price_gram_24k * (18 / 24),
       currency: "OMR",
       timestamp: data.timestamp,
-      open: data.open,
-      high: data.high,
-      low: data.low,
       change: data.ch,
       changePercent: data.chp,
     };
   } catch (err) {
     console.error("Gold API error:", err);
-    // Fallback rates
+
     return {
       pricePerGram24k: 24.5,
       pricePerGram22k: 22.46,
@@ -81,18 +80,22 @@ async function fetchLiveGoldRate() {
 // ============================================
 // PRICE CALCULATOR
 // ============================================
+
 function calculateItemPrice(goldRate, weightGrams, karat, category) {
   const rateKey =
     karat === 24
       ? "pricePerGram24k"
       : karat === 22
-        ? "pricePerGram22k"
-        : "pricePerGram18k";
+      ? "pricePerGram22k"
+      : "pricePerGram18k";
+
   const goldCost = goldRate[rateKey] * weightGrams;
   const makingCharge =
     (CONFIG.MAKING_CHARGES[category] || 2.5) * weightGrams;
+
   const subtotal = goldCost + makingCharge;
   const vat = subtotal * CONFIG.VAT_RATE;
+
   return {
     goldCost: +goldCost.toFixed(3),
     makingCharge: +makingCharge.toFixed(3),
@@ -106,9 +109,11 @@ function calculateItemPrice(goldRate, weightGrams, karat, category) {
 // ============================================
 // TELEGRAM NOTIFIER
 // ============================================
+
 async function sendTelegramMessage(message) {
   try {
     const url = `https://api.telegram.org/bot${CONFIG.TELEGRAM_TOKEN}/sendMessage`;
+
     await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -124,28 +129,57 @@ async function sendTelegramMessage(message) {
 }
 
 // ============================================
-// CLAUDE AI HELPER
+// GOOGLE GEMINI AI HELPER (NEW)
 // ============================================
-async function askClaude(systemPrompt, userMessage, history = []) {
-  const messages = [
-    ...history,
-    { role: "user", content: userMessage },
-  ];
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: CONFIG.CLAUDE_MODEL,
-      max_tokens: 1000,
-      system: systemPrompt,
-      messages,
-    }),
-  });
-  const data = await res.json();
-  return data.content?.[0]?.text || "";
+
+async function askAI(systemPrompt, userMessage, history = []) {
+  try {
+    const contents = [
+      ...history.map(h => ({
+        role: h.role === "assistant" ? "model" : "user",
+        parts: [{ text: h.content }],
+      })),
+      {
+        role: "user",
+        parts: [{ text: userMessage }],
+      },
+    ];
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.GEMINI_MODEL}:generateContent?key=${CONFIG.GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents,
+          systemInstruction: {
+            parts: [{ text: systemPrompt }],
+          },
+        }),
+      }
+    );
+
+    const data = await res.json();
+
+    return (
+      data?.candidates?.[0]?.content?.parts?.[0]?.text || ""
+    );
+  } catch (err) {
+    console.error("Gemini API error:", err);
+    return "";
+  }
 }
 
-// Export for use in HTML files via script tag
-if (typeof module !== "undefined") {
-  module.exports = { CONFIG, fetchLiveGoldRate, calculateItemPrice, sendTelegramMessage, askClaude };
+// ============================================
+// EXPORT (Node.js compatibility)
+// ============================================
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    CONFIG,
+    fetchLiveGoldRate,
+    calculateItemPrice,
+    sendTelegramMessage,
+    askAI,
+  };
 }
