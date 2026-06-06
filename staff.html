@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Al Noor Gold — Staff Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#C9A84C;--gold-light:#E8C97A;--bg:#0F1419;--surface:#1A2130;--surface2:#243044;--border:rgba(255,255,255,0.08);--text:#E2EAF4;--text-dim:#7A8BA0;--green:#22C55E;--yellow:#F59E0B;--red:#EF4444;--blue:#3B82F6;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+/* Login */
+.login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100;}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;width:360px;text-align:center;}
+.login-logo{font-size:2.5rem;margin-bottom:16px;}
+.login-title{font-family:'Syne',sans-serif;font-size:1.4rem;color:var(--gold-light);margin-bottom:4px;}
+.login-sub{font-size:0.8rem;color:var(--text-dim);margin-bottom:28px;}
+.l-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:0.9rem;outline:none;margin-bottom:12px;}
+.l-input:focus{border-color:var(--gold);}
+.l-btn{width:100%;background:linear-gradient(135deg,var(--gold),#8B6914);color:#0F1419;border:none;border-radius:10px;padding:12px;font-family:'Inter',sans-serif;font-weight:600;cursor:pointer;font-size:0.95rem;}
+/* Layout */
+.app{display:none;flex-direction:column;min-height:100vh;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;}
+.topbar-brand{font-family:'Syne',sans-serif;font-size:1.1rem;color:var(--gold-light);}
+.topbar-info{display:flex;align-items:center;gap:16px;font-size:0.8rem;color:var(--text-dim);}
+.staff-badge{background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);border-radius:20px;padding:4px 12px;color:var(--gold-light);font-size:0.75rem;}
+.rate-live{color:var(--gold);font-weight:500;}
+.nav{background:var(--surface);border-bottom:1px solid var(--border);display:flex;padding:0 24px;gap:4px;}
+.nav-btn{padding:12px 16px;font-size:0.82rem;color:var(--text-dim);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;font-family:'Inter',sans-serif;}
+.nav-btn:hover{color:var(--text);}
+.nav-btn.active{color:var(--gold-light);border-bottom-color:var(--gold);}
+.content{flex:1;padding:24px;max-width:1200px;margin:0 auto;width:100%;}
+/* Stats */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;}
+.stat-label{font-size:0.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;}
+.stat-val{font-size:1.6rem;font-weight:600;color:var(--text);}
+.stat-sub{font-size:0.72rem;color:var(--text-dim);margin-top:4px;}
+.stat-card.gold-card .stat-val{color:var(--gold-light);}
+/* Orders table */
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.table-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);}
+.table-title{font-family:'Syne',sans-serif;font-size:1rem;color:var(--text);}
+.filter-row{display:flex;gap:8px;}
+.filter-btn{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:5px 12px;color:var(--text-dim);font-size:0.75rem;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s;}
+.filter-btn:hover,.filter-btn.active{border-color:var(--gold);color:var(--gold-light);background:rgba(201,168,76,0.1);}
+table{width:100%;border-collapse:collapse;}
+th{padding:11px 16px;text-align:left;font-size:0.72rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border);}
+td{padding:13px 16px;font-size:0.83rem;border-bottom:1px solid rgba(255,255,255,0.04);}
+tr:last-child td{border:none;}
+tr:hover td{background:rgba(255,255,255,0.02);}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.7rem;font-weight:500;}
+.badge.pending{background:rgba(245,158,11,0.15);color:#F59E0B;border:1px solid rgba(245,158,11,0.3);}
+.badge.processing{background:rgba(59,130,246,0.15);color:#3B82F6;border:1px solid rgba(59,130,246,0.3);}
+.badge.dispatched{background:rgba(34,197,94,0.15);color:#22C55E;border:1px solid rgba(34,197,94,0.3);}
+.badge.completed{background:rgba(34,197,94,0.1);color:#16A34A;}
+.action-btns{display:flex;gap:6px;}
+.act-btn{padding:4px 10px;border-radius:6px;font-size:0.72rem;cursor:pointer;border:1px solid;font-family:'Inter',sans-serif;transition:all 0.2s;}
+.act-btn.process{border-color:rgba(59,130,246,0.4);color:#3B82F6;background:rgba(59,130,246,0.08);}
+.act-btn.dispatch{border-color:rgba(34,197,94,0.4);color:#22C55E;background:rgba(34,197,94,0.08);}
+.act-btn:hover{opacity:0.8;transform:translateY(-1px);}
+/* Panel */
+.panel{display:none;}
+.panel.active{display:block;}
+/* Inventory */
+.inv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
+.inv-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;}
+.inv-cat{font-family:'Syne',sans-serif;font-size:1rem;color:var(--gold-light);margin-bottom:10px;}
+.inv-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.8rem;}
+.inv-row:last-child{border:none;}
+.inv-key{color:var(--text-dim);}
+.inv-val{color:var(--text);font-weight:500;}
+/* Chat AI */
+.ai-chat{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;height:400px;display:flex;flex-direction:column;}
+.ai-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;}
+.ai-msg{padding:10px 14px;border-radius:12px;font-size:0.83rem;line-height:1.5;max-width:80%;}
+.ai-msg.bot{background:var(--surface2);border:1px solid var(--border);align-self:flex-start;}
+.ai-msg.user{background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.25);align-self:flex-end;}
+.ai-input-row{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border);}
+.ai-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'Inter',sans-serif;font-size:0.83rem;outline:none;}
+.ai-input:focus{border-color:var(--gold);}
+.ai-send{background:linear-gradient(135deg,var(--gold),#8B6914);color:#0F1419;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600;}
+</style>
+</head>
+<body>
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">🏪</div>
+    <div class="login-title">Staff Portal</div>
+    <div class="login-sub">Al Noor Gold · Branch Management</div>
+    <input class="l-input" id="staffUser" placeholder="Staff ID" type="text">
+    <input class="l-input" id="staffPass" placeholder="Password" type="password">
+    <button class="l-btn" onclick="doLogin()">Sign In</button>
+    <div style="margin-top:12px;font-size:0.72rem;color:var(--text-dim)">Demo: staff / staff123</div>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <div class="topbar">
+    <div class="topbar-brand">💎 Al Noor Gold — Staff Portal</div>
+    <div class="topbar-info">
+      <span class="rate-live" id="staffRate">Loading rates…</span>
+      <span class="staff-badge" id="staffName">Staff</span>
+      <button style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--text-dim);cursor:pointer;font-size:0.72rem;" onclick="logout()">Logout</button>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="nav-btn active" onclick="showPanel('orders',this)">📦 Orders</button>
+    <button class="nav-btn" onclick="showPanel('inventory',this)">📋 Inventory</button>
+    <button class="nav-btn" onclick="showPanel('calculator',this)">🧮 Calculator</button>
+    <button class="nav-btn" onclick="showPanel('assistant',this)">🤖 AI Assistant</button>
+  </div>
+  <div class="content">
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card gold-card"><div class="stat-label">24K Rate (OMR/g)</div><div class="stat-val" id="s24k">—</div><div class="stat-sub">Live market rate</div></div>
+      <div class="stat-card"><div class="stat-label">Today's Orders</div><div class="stat-val" id="sTodayOrders">—</div><div class="stat-sub">All branches</div></div>
+      <div class="stat-card"><div class="stat-label">Pending Dispatch</div><div class="stat-val" id="sPending" style="color:var(--yellow)">—</div><div class="stat-sub">Need action</div></div>
+      <div class="stat-card"><div class="stat-label">Today's Revenue</div><div class="stat-val" id="sRevenue">—</div><div class="stat-sub">OMR</div></div>
+    </div>
+
+    <!-- Orders Panel -->
+    <div class="panel active" id="panel-orders">
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">Orders</div>
+          <div class="filter-row">
+            <button class="filter-btn active" onclick="filterOrders('all',this)">All</button>
+            <button class="filter-btn" onclick="filterOrders('pending',this)">Pending</button>
+            <button class="filter-btn" onclick="filterOrders('processing',this)">Processing</button>
+            <button class="filter-btn" onclick="filterOrders('dispatched',this)">Dispatched</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table id="ordersTable">
+            <thead><tr><th>Order ID</th><th>Customer</th><th>Item</th><th>Weight</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody id="ordersTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inventory Panel -->
+    <div class="panel" id="panel-inventory">
+      <div class="inv-grid" id="invGrid"></div>
+    </div>
+
+    <!-- Calculator Panel -->
+    <div class="panel" id="panel-calculator">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;max-width:480px;">
+        <div style="font-family:'Syne',sans-serif;font-size:1.1rem;color:var(--gold-light);margin-bottom:20px">💰 Price Calculator</div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <label style="font-size:0.72rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:5px">Category</label>
+            <select id="calc_cat" onchange="calcUpdate()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'Inter',sans-serif;outline:none;">
+              <option value="rings">Ring</option><option value="necklaces">Necklace</option><option value="bracelets">Bracelet</option><option value="earrings">Earrings</option><option value="bangles">Bangles</option><option value="pendants">Pendant</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:0.72rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:5px">Karat</label>
+            <select id="calc_karat" onchange="calcUpdate()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'Inter',sans-serif;outline:none;">
+              <option value="22">22 Karat</option><option value="24">24 Karat</option><option value="18">18 Karat</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:0.72rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:5px">Weight (grams)</label>
+            <input id="calc_wt" type="number" min="0.1" step="0.1" placeholder="0.0" oninput="calcUpdate()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'Inter',sans-serif;outline:none;font-size:0.9rem;">
+          </div>
+          <div id="calcResult" style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:10px;padding:16px;display:none;">
+            <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:0.82rem;border-bottom:1px solid rgba(255,255,255,0.05)"><span style="color:var(--text-dim)">Gold Cost</span><span id="cr_gold"></span></div>
+            <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:0.82rem;border-bottom:1px solid rgba(255,255,255,0.05)"><span style="color:var(--text-dim)">Making Charges</span><span id="cr_making"></span></div>
+            <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:0.82rem;border-bottom:1px solid rgba(255,255,255,0.05)"><span style="color:var(--text-dim)">VAT (5%)</span><span id="cr_vat"></span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0 0;font-size:1.05rem;font-weight:600"><span style="color:var(--gold-light)">Total</span><span id="cr_total" style="color:var(--gold)"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Assistant Panel -->
+    <div class="panel" id="panel-assistant">
+      <div style="font-family:'Syne',sans-serif;font-size:1rem;color:var(--text);margin-bottom:16px">🤖 Staff AI Assistant</div>
+      <div class="ai-chat">
+        <div class="ai-messages" id="aiMessages">
+          <div class="ai-msg bot">Hello! I'm your staff assistant. I can help you with order management, pricing queries, customer information, or any operational questions. What do you need?</div>
+        </div>
+        <div class="ai-input-row">
+          <input class="ai-input" id="aiInput" placeholder="Ask anything about operations, pricing, orders…"
+            onkeydown="if(event.key==='Enter')staffAsk()">
+          <button class="ai-send" onclick="staffAsk()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TG_TOKEN="8994630048:AAHL8Q95Mw8bxroByusTNbsEruNm0QVofCY";
+const TG_CHAT="8994630048";
+const N8N_BASE="https://swiftpixel.app.n8n.cloud";
+const MAKING={rings:2.5,necklaces:3.0,bracelets:2.8,earrings:2.2,bangles:2.0,pendants:2.5};
+let goldRates=null;
+let allOrders=[];
+let aiHistory=[];
+
+// Demo orders
+const DEMO_ORDERS=[
+  {orderId:'ORD-001',name:'Ahmed Al Balushi',phone:'+968 9123 4567',item:'22K Gold Ring',weight:5.2,karat:22,category:'rings',address:'Muscat, Al Khuwair',total:52.3,status:'pending',timestamp:'2025-06-06T08:30:00'},
+  {orderId:'ORD-002',name:'Fatima Al Rashidi',phone:'+968 9234 5678',item:'18K Necklace',weight:8.5,karat:18,category:'necklaces',address:'Muscat, Ruwi',total:87.6,status:'processing',timestamp:'2025-06-06T09:15:00'},
+  {orderId:'ORD-003',name:'Khalid Al Harthy',phone:'+968 9345 6789',item:'22K Bracelet',weight:12.0,karat:22,category:'bracelets',address:'Seeb',total:124.5,status:'dispatched',timestamp:'2025-06-06T07:45:00'},
+  {orderId:'ORD-004',name:'Maryam Al Siyabi',phone:'+968 9456 7890',item:'24K Bangle Set',weight:18.3,karat:24,category:'bangles',address:'Nizwa',total:198.7,status:'pending',timestamp:'2025-06-06T10:00:00'},
+];
+
+function doLogin(){
+  const u=document.getElementById('staffUser').value;
+  const p=document.getElementById('staffPass').value;
+  if(u==='staff'&&p==='staff123'){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('app').style.display='flex';
+    document.getElementById('app').style.flexDirection='column';
+    document.getElementById('staffName').textContent='👤 '+u.toUpperCase();
+    initStaff();
+  }else{alert('Invalid credentials. Demo: staff / staff123');}
+}
+function logout(){document.getElementById('loginScreen').style.display='flex';document.getElementById('app').style.display='none';}
+
+async function initStaff(){
+  await loadGoldRate();
+  loadOrders();
+  loadInventory();
+}
+
+async function loadGoldRate(){
+  try{
+    const r=await fetch("https://www.goldapi.io/api/XAU/OMR",{headers:{"x-access-token":"goldapi-c36a3e84c694a2de90aa867206add82a-io"}});
+    const d=await r.json();
+    goldRates={p24:d.price_gram_24k,p22:d.price_gram_22k||(d.price_gram_24k*22/24),p18:d.price_gram_18k||(d.price_gram_24k*18/24)};
+  }catch(e){goldRates={p24:24.5,p22:22.46,p18:18.37};}
+  document.getElementById('staffRate').textContent=`24K: ${goldRates.p24.toFixed(3)} OMR/g`;
+  document.getElementById('s24k').textContent=goldRates.p24.toFixed(3);
+}
+
+function loadOrders(){
+  allOrders=[...DEMO_ORDERS];
+  // Try n8n
+  fetch(N8N_BASE+'/webhook/staff-orders').then(r=>r.json()).then(d=>{if(d&&Array.isArray(d)&&d.length){allOrders=[...d,...DEMO_ORDERS];}}).catch(()=>{}).finally(renderOrders);
+  renderStats();
+}
+
+function renderStats(){
+  const today=allOrders.filter(o=>o.timestamp.startsWith(new Date().toISOString().slice(0,10)));
+  document.getElementById('sTodayOrders').textContent=allOrders.length;
+  document.getElementById('sPending').textContent=allOrders.filter(o=>o.status==='pending').length;
+  document.getElementById('sRevenue').textContent=allOrders.reduce((s,o)=>s+(parseFloat(o.total)||0),0).toFixed(3);
+}
+
+function renderOrders(filter='all'){
+  const tbody=document.getElementById('ordersTbody');
+  const filtered=filter==='all'?allOrders:allOrders.filter(o=>o.status===filter);
+  tbody.innerHTML=filtered.map(o=>`
+    <tr>
+      <td style="color:var(--gold-light);font-weight:500">${o.orderId}</td>
+      <td><div>${o.name}</div><div style="font-size:0.72rem;color:var(--text-dim)">${o.phone}</div></td>
+      <td><div>${o.item}</div><div style="font-size:0.72rem;color:var(--text-dim)">${o.karat}K · ${o.weight}g · ${o.category}</div></td>
+      <td>${o.weight}g</td>
+      <td style="color:var(--gold);font-weight:500">${parseFloat(o.total).toFixed(3)} OMR</td>
+      <td><span class="badge ${o.status}">${o.status.charAt(0).toUpperCase()+o.status.slice(1)}</span></td>
+      <td style="font-size:0.75rem;color:var(--text-dim)">${new Date(o.timestamp).toLocaleDateString()}</td>
+      <td><div class="action-btns">
+        ${o.status==='pending'?`<button class="act-btn process" onclick="updateStatus('${o.orderId}','processing')">Process</button>`:''}
+        ${o.status==='processing'?`<button class="act-btn dispatch" onclick="updateStatus('${o.orderId}','dispatched')">Dispatch</button>`:''}
+        ${o.status==='dispatched'?`<span style="color:var(--green);font-size:0.72rem">✓ Dispatched</span>`:''}
+      </div></td>
+    </tr>`).join('');
+}
+
+async function updateStatus(oid,status){
+  const order=allOrders.find(o=>o.orderId===oid);
+  if(!order)return;
+  order.status=status;
+  renderOrders();renderStats();
+  // Telegram
+  const emoji=status==='processing'?'⚙️':'🚚';
+  try{await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:TG_CHAT,text:`${emoji} <b>Order ${oid}</b> updated to <b>${status.toUpperCase()}</b>\n👤 ${order.name} · 📞 ${order.phone}\n💍 ${order.item}\n⏰ ${new Date().toLocaleString()}`,parse_mode:'HTML'})});}catch(e){}
+  // n8n
+  try{await fetch(N8N_BASE+'/webhook/update-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:oid,status,updatedAt:new Date().toISOString()})});}catch(e){}
+}
+
+function filterOrders(f,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderOrders(f);
+}
+
+function loadInventory(){
+  const inv={rings:{count:24,lowStock:2,reorderLevel:5},necklaces:{count:18,lowStock:0,reorderLevel:4},bracelets:{count:11,lowStock:1,reorderLevel:3},earrings:{count:32,lowStock:0,reorderLevel:6},bangles:{count:15,lowStock:3,reorderLevel:4},pendants:{count:9,lowStock:2,reorderLevel:3}};
+  const grid=document.getElementById('invGrid');
+  grid.innerHTML=Object.entries(inv).map(([cat,d])=>`
+    <div class="inv-card">
+      <div class="inv-cat">${cat.charAt(0).toUpperCase()+cat.slice(1)}</div>
+      <div class="inv-row"><span class="inv-key">In Stock</span><span class="inv-val" style="color:${d.count>d.reorderLevel?'var(--green)':'var(--red)'}">${d.count}</span></div>
+      <div class="inv-row"><span class="inv-key">Low Stock Items</span><span class="inv-val" style="color:${d.lowStock>0?'var(--yellow)':'var(--text-dim)'}">${d.lowStock}</span></div>
+      <div class="inv-row"><span class="inv-key">Making Charge/g</span><span class="inv-val">${MAKING[cat]} OMR</span></div>
+      ${d.lowStock>0?`<div style="font-size:0.7rem;color:var(--yellow);margin-top:6px;padding:4px 8px;background:rgba(245,158,11,0.1);border-radius:6px">⚠️ Reorder needed</div>`:''}
+    </div>`).join('');
+}
+
+function showPanel(name,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+function calcUpdate(){
+  const w=parseFloat(document.getElementById('calc_wt')?.value)||0;
+  const k=parseInt(document.getElementById('calc_karat')?.value)||22;
+  const cat=document.getElementById('calc_cat')?.value||'rings';
+  const el=document.getElementById('calcResult');
+  if(!el)return;
+  if(!w||!goldRates){el.style.display='none';return;}
+  el.style.display='block';
+  const rate=k===24?goldRates.p24:k===22?goldRates.p22:goldRates.p18;
+  const gold=rate*w, making=(MAKING[cat]||2.5)*w, sub=gold+making, vat=sub*0.05, total=sub+vat;
+  document.getElementById('cr_gold').textContent=gold.toFixed(3)+' OMR';
+  document.getElementById('cr_making').textContent=making.toFixed(3)+' OMR';
+  document.getElementById('cr_vat').textContent=vat.toFixed(3)+' OMR';
+  document.getElementById('cr_total').textContent=total.toFixed(3)+' OMR';
+}
+
+async function staffAsk(){
+  const inp=document.getElementById('aiInput');
+  const text=inp.value.trim();if(!text)return;
+  inp.value='';
+  const msgs=document.getElementById('aiMessages');
+  const uDiv=document.createElement('div');uDiv.className='ai-msg user';uDiv.textContent=text;msgs.appendChild(uDiv);
+  aiHistory.push({role:'user',content:text});
+  const bDiv=document.createElement('div');bDiv.className='ai-msg bot';bDiv.textContent='Thinking…';msgs.appendChild(bDiv);
+  msgs.scrollTop=msgs.scrollHeight;
+  try{
+    const rc=goldRates?`Current gold rates: 24K=${goldRates.p24.toFixed(3)}, 22K=${goldRates.p22.toFixed(3)}, 18K=${goldRates.p18.toFixed(3)} OMR/gram. `:'';
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
+        system:`You are an expert AI assistant for Al Noor Gold jewelry store staff in Muscat, Oman. ${rc}Help with pricing calculations, order management, inventory questions, customer queries, jewelry knowledge, and operational tasks. Be concise and practical.`,
+        messages:aiHistory.slice(-8)})});
+    const data=await r.json();
+    const reply=data.content?.[0]?.text||"Sorry, I couldn't process that.";
+    aiHistory.push({role:'assistant',content:reply});
+    bDiv.textContent=reply;
+  }catch(e){bDiv.textContent="Couldn't connect to AI. Please try again.";}
+  msgs.scrollTop=msgs.scrollHeight;
+}
+</script>
+</body>
+</html>
