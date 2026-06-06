@@ -340,10 +340,34 @@ async function staffAsk(){
   msgs.scrollTop=msgs.scrollHeight;
   try{
     const rc=goldRates?`Current gold rates: 24K=${goldRates.p24.toFixed(3)}, 22K=${goldRates.p22.toFixed(3)}, 18K=${goldRates.p18.toFixed(3)} OMR/gram. `:'';
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
-        system:`You are an expert AI assistant for Al Noor Gold jewelry store staff in Muscat, Oman. ${rc}Help with pricing, order management, inventory, customer queries, and operational tasks. Be concise and practical.`,
-        messages:aiHistory.slice(-8)})});
+
+
+
+    
+    const r = await fetch('/.netlify/functions/gemini-proxy', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    prompt: `
+You are an expert AI assistant for Al Noor Gold jewelry store staff in Muscat, Oman.
+${goldRates ? `Current gold rates: 24K=${goldRates.p24.toFixed(3)}, 22K=${goldRates.p22.toFixed(3)}, 18K=${goldRates.p18.toFixed(3)} OMR/gram.` : ""}
+
+User conversation:
+${aiHistory.map(m => m.role + ": " + m.content).join("\n")}
+`
+  })
+});
+
+
+
+    
+const data = await r.json();
+
+const reply =
+  data.candidates?.[0]?.content?.parts?.[0]?.text || "No response from AI";
+    
     const data=await r.json();
     const reply=data.content?.[0]?.text||"Sorry, couldn't process that.";
     aiHistory.push({role:'assistant',content:reply});
