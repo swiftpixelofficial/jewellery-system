@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Al Noor Gold — Portal Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+body{min-height:100vh;background:#0A0A0A;font-family:'Jost',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
+.bg{position:fixed;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(201,168,76,0.07) 0%,transparent 60%),radial-gradient(ellipse at 70% 20%,rgba(201,168,76,0.04) 0%,transparent 50%);pointer-events:none;}
+.hero{text-align:center;margin-bottom:40px;}
+.hero-icon{font-size:2.8rem;margin-bottom:14px;}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,5vw,2.8rem);font-weight:300;color:#E8C97A;letter-spacing:0.06em;margin-bottom:8px;}
+.hero-sub{font-size:0.75rem;color:#5A5040;letter-spacing:0.2em;text-transform:uppercase;}
+.portals{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;padding:0;width:100%;max-width:760px;}
+.portal-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:20px;padding:28px 22px;text-align:center;cursor:pointer;transition:all 0.35s;text-decoration:none;display:block;}
+.portal-card:hover{background:rgba(201,168,76,0.07);border-color:rgba(201,168,76,0.4);transform:translateY(-5px);}
+.portal-card:active{transform:translateY(-2px);}
+.portal-icon{font-size:2.2rem;margin-bottom:12px;}
+.portal-name{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:#E8C97A;margin-bottom:5px;}
+.portal-desc{font-size:0.72rem;color:#6A6050;line-height:1.5;}
+.portal-tag{display:inline-block;margin-top:12px;padding:3px 12px;border-radius:20px;font-size:0.65rem;letter-spacing:0.08em;}
+.portal-card.customer .portal-tag{background:rgba(201,168,76,0.12);color:#C9A84C;border:1px solid rgba(201,168,76,0.2);}
+.portal-card.staff .portal-tag{background:rgba(59,130,246,0.1);color:#3B82F6;border:1px solid rgba(59,130,246,0.2);}
+.portal-card.admin .portal-tag{background:rgba(139,92,246,0.1);color:#8B5CF6;border:1px solid rgba(139,92,246,0.2);}
+.footer{margin-top:36px;font-size:0.68rem;color:#3A3028;letter-spacing:0.12em;text-align:center;}
+@media(max-width:480px){
+  .portals{grid-template-columns:1fr;}
+  .portal-card{padding:22px 18px;border-radius:16px;}
+  body{padding:16px;}
+  .hero{margin-bottom:28px;}
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="hero">
+  <div class="hero-icon">💎</div>
+  <div class="hero-title">Al Noor Gold</div>
+  <div class="hero-sub">Select Your Portal</div>
+</div>
+<div class="portals">
+  <a href="customer.html" class="portal-card customer">
+    <div class="portal-icon">🛍️</div>
+    <div class="portal-name">Customer</div>
+    <div class="portal-desc">Browse our gold jewellery collection, check live rates, and place orders with your AI concierge</div>
+    <div class="portal-tag">PUBLIC ACCESS</div>
+  </a>
+  <a href="staff.html" class="portal-card staff">
+    <div class="portal-icon">🏪</div>
+    <div class="portal-name">Staff Portal</div>
+    <div class="portal-desc">Manage orders, check inventory, calculate prices, and use the staff AI assistant</div>
+    <div class="portal-tag">STAFF ONLY</div>
+  </a>
+  <a href="admin.html" class="portal-card admin">
+    <div class="portal-icon">👑</div>
+    <div class="portal-name">Admin Dashboard</div>
+    <div class="portal-desc">Full business analytics, branch performance, sales trends, and AI-powered insights</div>
+    <div class="portal-tag">ADMIN ONLY</div>
+  </a>
+</div>
+<div class="footer">Muscat, Oman · Powered by Al Noor Gold</div>
+</body>
+</html>
