@@ -1,5 +1,3 @@
-const fetch = require('node-fetch');
-
 exports.handler = async function (event, context) {
   // Handle preflight CORS requests if needed
   if (event.httpMethod === "OPTIONS") {
@@ -58,6 +56,7 @@ exports.handler = async function (event, context) {
       };
     }
 
+    // Using native global fetch - zero dependencies required
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
