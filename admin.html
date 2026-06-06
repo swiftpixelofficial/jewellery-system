@@ -414,13 +414,24 @@ async function adminAsk(){
   const bDiv=document.createElement('div');bDiv.className='ai-m bot';bDiv.textContent='Analyzing…';msgs.appendChild(bDiv);
   msgs.scrollTop=msgs.scrollHeight;
   const ctx=`Business Data:\n- Orders: ${DEMO_ORDERS.length}, Revenue: ${getRevenue().toFixed(3)} OMR\n- Gold: 24K=${goldRates?.p24?.toFixed(3)}, 22K=${goldRates?.p22?.toFixed(3)}, 18K=${goldRates?.p18?.toFixed(3)} OMR/g\n- Top category: Rings 32%, Necklaces 24%\n- Best branch: Muscat Main (3980 OMR/month)\n- Best day: Saturday`;
-  try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:`You are an expert business intelligence AI for Al Noor Gold jewelry store in Muscat, Oman. Analyze data and give actionable insights. ${ctx}`,messages:aiHistory.slice(-8)})});
-    const data=await r.json();
-    const reply=data.content?.[0]?.text||"Unable to analyze. Try again.";
-    aiHistory.push({role:'assistant',content:reply});
-    bDiv.textContent=reply;
-  }catch(e){bDiv.textContent="Connection error. Please retry.";}
+  
+  try {
+  const ctx = `Business Data:\n- Orders: ${DEMO_ORDERS.length}, Revenue: ${getRevenue().toFixed(3)} OMR\n- Gold: 24K=${goldRates?.p24?.toFixed(3)}, 22K=${goldRates?.p22?.toFixed(3)}, 18K=${goldRates?.p18?.toFixed(3)} OMR/g\n- Top category: Rings 32%, Necklaces 24%\n- Best branch: Muscat Main (3980 OMR/month)\n- Best day: Saturday`;
+  const systemPrompt = `You are an expert business intelligence AI for Al Noor Gold jewelry store in Muscat, Oman. Analyze data and give actionable insights. ${ctx}`;
+  
+  const reply = await askGeminiProxy(systemPrompt, text, aiHistory.slice(-6));
+  
+  bDiv.textContent = reply;
+  aiHistory.push({role:'assistant', content:reply});
+} 
+  
+  catch(err) {
+  console.error(err);
+  bDiv.textContent = "Analytics engine encountered an update error.";
+}
+  
+  
+  catch(e){bDiv.textContent="Connection error. Please retry.";}
   msgs.scrollTop=msgs.scrollHeight;
 }
 </script>
